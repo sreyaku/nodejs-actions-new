@@ -21,8 +21,8 @@ jobs:
         password: ${{ secrets.Docker_Hub_Password }}
     - name: Push the Docker image
       run: |
-        docker tag my-app ${{ secrets.DOCKER_USERNAME }}/my-app
-        docker push ${{ secrets.DOCKER_USERNAME }}/my-app
+        docker tag my-app ${{ secrets.Docker_Hub_Username }}/my-app
+        docker push ${{ secrets.Docker_Hub_Username}}/my-app
     - name: Deploy to EC2
       uses: appleboy/ssh-action@master
       with:
