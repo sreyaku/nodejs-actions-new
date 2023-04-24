@@ -1,0 +1,60 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: docker build -t my-app .
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.sreyakunni }}
+        password: ${{ secrets.Rohith@1999 }}
+    - name: Push the Docker image
+      run: |
+        docker tag my-app ${{ secrets.DOCKER_USERNAME }}/my-app
+        docker push ${{ secrets.DOCKER_USERNAME }}/my-app
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.54.163.189.143 }}
+        username: ${{ secrets.ec2-user }}
+        key: ${{ secrets.-----BEGIN RSA PRIVATE KEY-----
+MIIEoQIBAAKCAQEAtTsnoQryYSViW6Q+rVsx38LY2hXZEKF6mXDUT+P/M++UeTFP
+OcIVy5GoLFJae8xfXEGateyPv4sAFTCrE3lNbKx0OxC6i6L1sh3zn2LlV4kVTXXH
+oTJkyTQNVR+Ta7JnTHy2y0itFrdpIBcgMx8PjsJP+2Rp19zFh47b3oQDIHoGq+pD
+Qn8+ylosiG10/hB3iY1Yp1WW/kFnW1Yh+DAcqJk2l2XqpJDeGkggrh4tAZE3R1mq
+mrF3Rlgm+QlFaMhsiaxAWCYoVKY44dtexQ/3le9GE+ude7OKoRFV+nsxzJbQJKEA
+2atHgTjn5ESu52DlKSCKPOqBkc8nrKR5rnF1QwIDAQABAoIBAB4d/YDyu8LPHqBS
+FCRk8k3YKIddeBweaaxUJsQ8BG4SE19shVj42vxgcU0kRmsqVHKVaGtxK5ZOOC5N
+TzDGSMqVgh9KsWWBKEl4VsMXATvhyQt9VjaAlGUnZEvQGoScOjRoyUvRAQq0YiD2
+FuDH+aLkwbvqPPildKIJaJp637YmqWMR7ieEGdeMkJBTmUOjyCuhEOoPw2U+77fv
+K2cPi+IEE2hLSgCnGIX32C6vno2ptWbcLvySZ55yK40EiTiFI77tP/i/fNz80uTA
+9zrzn/kz0lK6Ti6ZVWSzDMJorUC5eVd5Ltd+BBwXWus4pXztp3WylzxzFX5SQuLB
+CuRa7qECgYEA6RA10tNbkEXbPyziDzk+xNo/xi4fW4zo6PH+4ksKDhZNJAWWXVCG
+XUE7KcwteEbPAqaYU+GTZ39bSH5gaBM2pvGVYogXvHCJEmJC9rqjoHIQHJYgYkBl
+Ver0U+CvVhWhAUO9jQWoqEGWKOZeTAKjhVYnyyohG/RKscnEqVXSC3ECgYEAxxEV
+pz0jCeRprOhc773KNEMBxvVmVmdNDCFMc6RV0lw8Mj8Z/MseSnpQchAuNvG1ar+C
+px5AxmVruMWL7Gxuk+DK2gE+K6mXmBZvM4321mFYBAiyjXTn3MyrFsxnzXv9rlML
+B09rESeIESFnWFl3J2D31Mqp8p28F+8NSDczqfMCgYEAm4Jud4MB2I1UEp5PJFtN
+D6qU3RaPY9Xs3uoB6VqqleW5iSyVPSRq0zSgVm5fdJ7CqAEjKO0eHvPyo7d3elo/
+oDsYM0udkuYAAB1Ck0DLx1X0fC6L4yMWurJwXrtQIv+Bk8dwZfV9qO9CU34LM2qb
+U2++U6iDuRRS9rgrmdWitnECgYB6b/qme0byzadlryGCX3RgApq0ObmxCSZtgIma
+UwhqM0rfCMq+HlxKKMMT9PnH15Di0FnW2hezLyw7YF24k9TLZaa+wabwigXwiFPr
+HLUmlIbjLEpOEQqPVt8gTabGzy1vrCoLXACZc3wQNUBwKc7MzKqCGgi/bd8DxYeg
+1DsVmwJ/a8/qgaROt3vcJ/xajejeGnSaQPKObR6e3bKyf/azkX83rCfzfvqu5Sfz
+FF5x+IWVnkoj7A4TjzQwGhy5cbJCpDa0R6xLQ3RpJSyyTqZRLeBo5uWNMblFDXhB
+byMPkkKyCjCIXe5gfi7ywfD7trcKSVM2PIjT754Xk9UzkI6iQg==
+-----END RSA PRIVATE KEY----- }}
+        script: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/my-app
+          docker stop my-app || true
+          docker rm my-app || true
+          docker run -d --name my-app -p 80:3000 ${{ secrets.DOCKER_USERNAME }}/my-app
