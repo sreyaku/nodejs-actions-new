@@ -26,9 +26,12 @@ jobs:
     - name: Deploy to EC2
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.54.163.189.143 }}
+        EC2_HOST:54.163.189.143
+        EC2_USERNAME:ec2-user
+        EC2_KEY:nodejs_app
+        host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.ec2-user }}
-        key: ${{ secrets.nodejs_app }}
+        key: ${{ secrets.EC2_KEY }}
         script: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/my-app
           docker stop my-app || true
