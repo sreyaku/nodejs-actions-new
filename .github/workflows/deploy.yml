@@ -30,7 +30,7 @@ jobs:
         EC2_USERNAME: ec2-user
         EC2_KEY: nodejs_app
         host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.ec2-user }}
+        username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_KEY }}
         script: |
           docker pull ${{ secrets.Docker_Hub_Username }}/my-app
