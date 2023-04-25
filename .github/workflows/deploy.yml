@@ -2,63 +2,38 @@ name: Deploy to EC2
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install AWS CLI
-        run: |
-          sudo apt-get update && sudo apt-get install -y awscli
-
-      - name: Configure AWS credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-          aws configure set default.region us-east-1
-
-      - name: Install Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-          sudo apt-get update
-          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-          sudo usermod -aG docker $USER
-
-      - name: Build Docker image
-        run: |
-          docker build -t my-node-app .
-
-      - name: Tag Docker image
-        run: |
-          docker tag my-node-app:latest my-node-app:prod
-
-      - name: Push Docker image to AWS ECR
-        env:
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-        run: |
-          $(aws ecr get-login --no-include-email --region us-east-1)
-          docker tag my-node-app:prod $ECR_REGISTRY/my-node-app:prod
-          docker push $ECR_REGISTRY/my-node-app:prod
-
-      - name: Deploy Docker image to EC2 instance
-        env:
-          EC2_INSTANCE_IP: ${{ secrets.EC2_INSTANCE_IP }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          chmod 600 $SSH_PRIVATE_KEY
-          ssh -o "StrictHostKeyChecking=no" -i $SSH_PRIVATE_KEY ec2-user@$EC2_INSTANCE_IP "docker stop my-node-app || true"
-          ssh -o "StrictHostKeyChecking=no" -i $SSH_PRIVATE_KEY ec2-user@$EC2_INSTANCE_IP "docker rm my-node-app || true"
-          ssh -o "StrictHostKeyChecking=no" -i $SSH_PRIVATE_KEY ec2-user@$EC2_INSTANCE_IP "docker pull $ECR_REGISTRY/my-node-app:prod"
-          ssh -o "StrictHostKeyChecking=no" -i $SSH_PRIVATE_KEY ec2-user@$EC2_INSTANCE_IP "docker run -d --restart always --name my-node-app -p 80:3000 $ECR_REGISTRY/my-node-app:prod"
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: docker build -t my-node-app .
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        Docker_Hub_Username: sreyakunni
+        Docker_Hub_Password: Rohith@1999
+        username: ${{ secrets.Docker_Hub_Username }}
+        password: ${{ secrets.Docker_Hub_Password }}
+    - name: Push the Docker image
+      run: |
+        docker tag my-app ${{ secrets.Docker_Hub_Username }}/my-node-app
+        docker push ${{ secrets.Docker_Hub_Username}}/my-node-app
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        EC2_HOST: 54.163.189.143
+        EC2_USERNAME: ec2-user
+        EC2_KEY: nodejs_app
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          docker pull ${{ secrets.Docker_Hub_Username }}/my-node-app
+          docker stop my-node-app || true
+          docker rm my-node-app || true
+          docker run -d --name my-node-app -p 80:3000 ${{ secrets.Docker_Hub_Username }}/my-node-app
