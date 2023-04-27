@@ -32,3 +32,4 @@ jobs:
           docker stop my-node-app || true
           docker rm my-node-app || true
           docker run -d --name my-node-app -p 80:3000 ${{ secrets.Docker_Hub_Username }}/my-node-app
+          docker push my-node-app -p 80:3000 ${{ secrets.Docker_Hub_Username }}/my-node-app
